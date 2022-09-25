@@ -11,25 +11,27 @@ y = iris.target
 
 ## suffle data
 from sklearn.utils import shuffle
+
 X, y = shuffle(X, y, random_state=41)
 
 ## split data 10 fold
 X_split = np.array_split(X, 10)
 y_split = np.array_split(y, 10)
-## 
+##
 
 print("Training and Testing")
 print("____________________")
 from sklearn.naive_bayes import GaussianNB
-from sklearn import metrics	
+from sklearn import metrics
+# varabils to store training and testing results
 results_train = [0] * 10
 results_test = [0] * 10
 y_pred_test = [0] * 10
 y_pred_train = [0] * 10
-##two loops the outter one selects the test data and the nested loop adds the training data in one array
+##two loops the outer one selects the test data and the nested loop adds the training data in one array
 for i in range(10):
 	X_train = []
-	y_train = [] 
+	y_train = []
 	for j in range(10):
 		if (j == i):
 			continue
@@ -39,27 +41,30 @@ for i in range(10):
 		else:
 			X_train = np.concatenate((X_train, X_split[j]))
 			y_train = np.concatenate((y_train, y_split[j]))
-	#  training is done here
+    #  training is done here and testing on training data
 	gnb = GaussianNB()
 	gnb.fit(X_train, y_train)
 	y_pred_train[i] = gnb.predict(X_train)
+	results_train[i] = (metrics.accuracy_score(y_train, y_pred_train[i]) * 100)
 	print("Gaussian Naive Bayes model fold : ", i)
-	print("\tTraining accuracy(in %):\t\t", metrics.accuracy_score(y_train, y_pred_train[i])*100)
-	print("\tNumber of mislabeled points :\t %d/%d" % ( (y_train != y_pred_train[i]).sum(),X_train.shape[0]))
-	# predict the test data and print it
+	print("\tTraining accuracy(in %):\t\t", round(results_train[i],2))
+	
+	print("\tNumber of mislabeled points :\t %d/%d" %
+          ((y_train != y_pred_train[i]).sum(), X_train.shape[0]))
+    # predict the test data and print it
 	y_pred_test[i] = gnb.predict(X_split[i])
-	print("\tTest accuracy(in %):\t\t\t", metrics.accuracy_score(y_split[i], y_pred_test[i])*100)
-	print("\tNumber of mislabeled points :\t %d/%d" % ( (y_split[i] != y_pred_test[i]).sum(),X_split[i].shape[0]))
-	results_test[i] = metrics.accuracy_score(y_split[i], y_pred_test[i])*100 
-	results_train[i] = metrics.accuracy_score(y_train, y_pred_train[i])*100
+	results_test[i] = (metrics.accuracy_score(y_split[i], y_pred_test[i]) * 100)
+	print("\tTest accuracy(in %):\t\t\t",
+          round(results_train[i],2))
+	print("\tNumber of mislabeled points :\t %d/%d" %
+          ((y_split[i] != y_pred_test[i]).sum(), X_split[i].shape[0]))
 	print("*******************")
-
-print("The mean accuarcy for training is: ", np.mean(results_train))
-print("The mean accuarcy for testing is: ", np.mean(results_test))
+# printing mean and variance
+print("The mean accuarcy for training is: ", round(np.mean(results_train),2))
+print("The mean accuarcy for testing is: ", round(np.mean(results_test),2))
 print()
-print("The variance for training is: ", np.var(results_train))
-print("The variance for testing is: ", np.var(results_test))
- 
+print("The variance for training is: ", round(np.var(results_train),2))
+print("The variance for testing is: ", round(np.var(results_test),2))
 
 ## The code below is the tutoral I learned from
 
